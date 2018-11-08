@@ -1,4 +1,4 @@
-package com.raemacias.superheroes;
+package activities;
 
 import android.content.Intent;
 import android.os.Build;
@@ -13,7 +13,9 @@ import android.widget.Toast;
 import com.like.LikeButton;
 import com.like.OnAnimationEndListener;
 import com.like.OnLikeListener;
+import com.raemacias.superheroes.R;
 
+import activities.MainActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

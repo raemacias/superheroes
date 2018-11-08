@@ -1,12 +1,16 @@
-package com.raemacias.superheroes;
+package activities;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,6 +29,8 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.like.LikeButton;
+import com.like.OnLikeListener;
+import com.raemacias.superheroes.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adapters.HeroAdapter;
+import database.AppExecutors;
+import database.FavoriteDatabase;
+import database.FavoriteItemDao;
+import models.FavoriteViewModel;
 import models.Hero;
 import network.Api;
 import okhttp3.Request;
@@ -53,10 +63,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     RecyclerView recyclerView;
     HeroAdapter adapter;
     List<Hero> heroList;
+    static List<Hero> favoriteHeroes;
+    FavoriteDatabase db;
+    private FavoriteItemDao favoriteDatabaseDao;
 
     private String TAG = "Main Activity";
     private String LOG = "";
     private SharedPreferences mSharedPreferences;
+    private FavoriteViewModel mViewModel;
+    LikeButton heartButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +81,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        final LikeButton heartButton = findViewById(R.id.heart_button);
+        db = FavoriteDatabase.getFavoriteDatabase(this);
+        favoriteDatabaseDao = db.mFavoriteItemDao();
 
         heroList = new ArrayList<>();
 
@@ -81,39 +103,50 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         mAdView.loadAd(adRequest);
 
 
-        //calling the method to display the heroes
-//        getHeroes();
-        loadHeroes();
-        loadFavorites();
-
-//        @Override
-//        public boolean onCreateOptionsMenu(Menu menu) {
-//            MenuInflater inflater = getMenuInflater();
-//            inflater.inflate(R.menu.menu, menu);
-//            return true;
-        }
-
-
+//        heartButton.setOnLikeListener(new OnLikeListener() {
 //
-//            @Override
-//            public void unLiked(LikeButton likeButton) {
 //
-//                final Hero deleteFavoriteItems = new Hero(favoriteResults.getId(), favoriteResults.getOriginalTitle(),
-//                        favoriteResults.getPosterPath(), favoriteResults.getReleaseDate(), favoriteResults.getVoteAverage(), favoriteResults.getOverview());
+//            public void liked(LikeButton likeButton) {
+//                // Code here executes on main thread after user presses button
+//                final Hero getFavoriteItems = new Hero(favoriteHeroes.getName(), favoriteHeroes.getRealname(),
+//                        favoriteHeroes.getTeam(), favoriteHeroes.getFirstappearance(), favoriteHeroes.getCreatedby(), favoriteHeroes.getPublisher(), favoriteHeroes.getImageurl(), favoriteHeroes.getBio());
 //
 //                AppExecutors.getInstance().diskIO().execute(new Runnable() {
 //                    @Override
 //                    public void run() {
-//                        favoriteDatabaseDao.deleteFavorite(deleteFavoriteItems);
-//                        Log.d(TAG, deleteFavoriteItems.getOriginalTitle() + " has been deleted from your favorites.");
+//                        db.mFavoriteItemDao().insertFavorite(getFavoriteItems);
 //                    }
 //                });
 //
 //            }
 //
-//            public static final String TAG = "Detail Activity";
+//            @Override
+//            public void unLiked(LikeButton likeButton) {
+//
+//                final Hero deleteFavoriteItems = new Hero(favoriteHeroes.getName(), favoriteHeroes.getRealname(),
+//                        favoriteHeroes.getTeam(), favoriteHeroes.getFirstappearance(), favoriteHeroes.getCreatedby(), favoriteHeroes.getPublisher(), favoriteHeroes.getImageurl(), favoriteHeroes.getBio());
+//
+//                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        favoriteDatabaseDao.deleteFavorite(deleteFavoriteItems);
+//                        Log.d(TAG, deleteFavoriteItems.getName() + " has been deleted from your favorites.");
+//                    }
+//                });
+
+
+                initHeroView();
+                initFavoriteView();
+                loadHeroes();
+            }
+
 //        });
 //    }
+
+
+    private void initHeroView() {
+        checkSortOrder();
+    }
 
     private void loadHeroes() {
 
@@ -160,9 +193,27 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         requestQueue.add(stringRequest);
 }
 
-        private void loadFavorites() {
+        private void initFavoriteView() {
+        checkSortOrder();
+    }
+    //for loading favorites from DB
+    private void loadFavorites() {
 
+        mViewModel = ViewModelProviders.of(this).get(FavoriteViewModel.class);
 
+        mViewModel.getFavoriteItems().observe(this, new Observer<List<Hero>>() {
+            @Override
+            public void onChanged(@Nullable final List<Hero> heroList) {
+                favoriteHeroes = heroList;
+            }
+        });
+
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
     }
 
     @Override
@@ -181,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             Log.d(LOG, "Sort by all heroes.");
             loadHeroes();
 
-        } else (sortOrder.equals(this.getString(R.string.pref_sort_favorite))); {
+        } else {
             Log.d(LOG, "Sort by favorites.");
             loadFavorites();
         }
