@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_popular"
+        android:id="@+id/menu_all"
         android:title="@string/pref_sort_all"
         android:orderInCategory="100"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/menu_rating"
+        android:id="@+id/menu_favorite"
         android:title="@string/pref_sort_favorite"
         android:orderInCategory="200"
         app:showAsAction="never" />

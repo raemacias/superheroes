@@ -45,7 +45,7 @@ public class Hero {
     private String bio;
 
 
-    public Hero(String name, String realname, String team, String firstappearance, String createdby, String publisher, String imageurl, String bio) {
+    public Hero(@NonNull String name, String realname, String team, String firstappearance, String createdby, String publisher, String imageurl, String bio) {
         this.name = name;
         this.realname = realname;
         this.team = team;

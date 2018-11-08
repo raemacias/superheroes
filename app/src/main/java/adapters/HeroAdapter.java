@@ -1,6 +1,7 @@
 package adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.like.LikeButton;
@@ -19,7 +21,11 @@ import com.raemacias.superheroes.R;
 
 import java.util.List;
 
+import activities.DetailActivity;
 import models.Hero;
+
+// This code has been adapted from www.learn2crack.com
+// and Simplified Coding
 
 public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroViewHolder> implements OnLikeListener {
 
@@ -79,6 +85,10 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroViewHolder
             }
         });
     }
+    public void setId(List<Hero> favoriteResults){
+        heroList = favoriteResults;
+        notifyDataSetChanged();
+    }
 
     @Override
     public int getItemCount() {
@@ -114,6 +124,29 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroViewHolder
             imageView = itemView.findViewById(R.id.imageView);
 
             linearLayout = itemView.findViewById(R.id.linearLayout);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        Hero clickedDataItem = heroList.get(pos);
+                        Intent intent = new Intent(context, DetailActivity.class);
+                        intent.putExtra("name", heroList.get(pos).getName());
+                        intent.putExtra("realname", heroList.get(pos).getRealname());
+                        intent.putExtra("team", heroList.get(pos).getTeam());
+                        intent.putExtra("firstappearance", heroList.get(pos).getFirstappearance());
+                        intent.putExtra("createdby", heroList.get(pos).getCreatedby());
+                        intent.putExtra("publisher", heroList.get(pos).getPublisher());
+                        intent.putExtra("bio", heroList.get(pos).getBio());
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                        Toast.makeText(v.getContext(), "You clicked " + clickedDataItem.getName(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
         }
     }
 }
