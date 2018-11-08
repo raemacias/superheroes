@@ -13,14 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.like.LikeButton;
+import com.like.OnLikeListener;
 import com.raemacias.superheroes.R;
 
 import java.util.List;
 
 import models.Hero;
 
-public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroViewHolder> {
-
+public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroViewHolder> implements OnLikeListener {
 
     private List<Hero> heroList;
     private Context context;
@@ -73,7 +74,7 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroViewHolder
                 //getting the position of the item to expand it
                 currentPosition = position;
 
-                //reloding the list
+                //reloading the list
                 notifyDataSetChanged();
             }
         });
@@ -82,6 +83,16 @@ public class HeroAdapter extends RecyclerView.Adapter<HeroAdapter.HeroViewHolder
     @Override
     public int getItemCount() {
         return heroList.size();
+    }
+
+    @Override
+    public void liked(LikeButton likeButton) {
+
+    }
+
+    @Override
+    public void unLiked(LikeButton likeButton) {
+
     }
 
     class HeroViewHolder extends RecyclerView.ViewHolder {

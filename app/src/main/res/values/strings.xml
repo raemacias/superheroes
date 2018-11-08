@@ -14,5 +14,8 @@
     <string name="marvel_comics">Marvel Comics</string>
     <string name="bio">Bio</string>
     <string name="bio_long">Steven Rogers was born in the Lower East Side of Manhattan, New York City, in 1925 to poor Irish immigrants, Sarah and Joseph Rogers.[54] Joseph died when Steve was a child, and Sarah died of pneumonia while Steve was a teen. By early 1940, before America\'s entry into World War II, Rogers is a tall, scrawny fine arts student specializing in illustration and a comic book writer and artist.</string>
+    <string name="_1974">1974</string>
+    <string name="pref_sort_all">All Heroes</string>
+    <string name="pref_sort_favorite">Favorites</string>
 
 </resources>
