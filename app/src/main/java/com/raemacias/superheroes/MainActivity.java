@@ -1,11 +1,15 @@
 package com.raemacias.superheroes;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -20,6 +24,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.like.LikeButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +45,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 //This code was completed by following the tutorial at https://www.simplifiedcoding.net/expandable-recyclerview-android/
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     final String URL_GET_DATA = "https://simplifiedcoding.net/demos/marvel/";
 
@@ -50,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     List<Hero> heroList;
 
     private String TAG = "Main Activity";
+    private String LOG = "";
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +84,36 @@ public class MainActivity extends AppCompatActivity {
         //calling the method to display the heroes
 //        getHeroes();
         loadHeroes();
-    }
+        loadFavorites();
+
+//        @Override
+//        public boolean onCreateOptionsMenu(Menu menu) {
+//            MenuInflater inflater = getMenuInflater();
+//            inflater.inflate(R.menu.menu, menu);
+//            return true;
+        }
+
+
+//
+//            @Override
+//            public void unLiked(LikeButton likeButton) {
+//
+//                final Hero deleteFavoriteItems = new Hero(favoriteResults.getId(), favoriteResults.getOriginalTitle(),
+//                        favoriteResults.getPosterPath(), favoriteResults.getReleaseDate(), favoriteResults.getVoteAverage(), favoriteResults.getOverview());
+//
+//                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        favoriteDatabaseDao.deleteFavorite(deleteFavoriteItems);
+//                        Log.d(TAG, deleteFavoriteItems.getOriginalTitle() + " has been deleted from your favorites.");
+//                    }
+//                });
+//
+//            }
+//
+//            public static final String TAG = "Detail Activity";
+//        });
+//    }
 
     private void loadHeroes() {
 
@@ -122,6 +158,44 @@ public class MainActivity extends AppCompatActivity {
                 });
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
+}
+
+        private void loadFavorites() {
+
+
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d(LOG, "Preferences updated.");
+        checkSortOrder();
+
+    }
+    private void checkSortOrder() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String sortOrder = preferences.getString(
+                this.getString(R.string.pref_sort_all),
+                this.getString(R.string.pref_sort_favorite));
+
+        if (sortOrder.equals(this.getString(R.string.pref_sort_all))) {
+            Log.d(LOG, "Sort by all heroes.");
+            loadHeroes();
+
+        } else (sortOrder.equals(this.getString(R.string.pref_sort_favorite))); {
+            Log.d(LOG, "Sort by favorites.");
+            loadFavorites();
+        }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if (heroList.isEmpty()){
+            checkSortOrder();
+        } else {
+
+            checkSortOrder();
+        }
+    }
 }
+
