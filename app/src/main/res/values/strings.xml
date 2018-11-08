@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Superheroes</string>
+
+    <string name="test_banner_ad">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="IronMan">Iron Man</string>
+    <string name="real_name">Real Name</string>
+    <string name="TonyStark">Tony Stark</string>
+    <string name="team">Team</string>
+    <string name="Avengers">Avengers</string>
+    <string name="first_appearance">First Appearance</string>
+    <string name="created_by">Created By</string>
+    <string name="StanLee">Stan Lee</string>
+    <string name="publisher">Publisher</string>
+    <string name="marvel_comics">Marvel Comics</string>
+    <string name="bio">Bio</string>
+    <string name="bio_long">Steven Rogers was born in the Lower East Side of Manhattan, New York City, in 1925 to poor Irish immigrants, Sarah and Joseph Rogers.[54] Joseph died when Steve was a child, and Sarah died of pneumonia while Steve was a teen. By early 1940, before America\'s entry into World War II, Rogers is a tall, scrawny fine arts student specializing in illustration and a comic book writer and artist.</string>
+
+</resources>
