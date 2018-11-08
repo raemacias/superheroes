@@ -2,7 +2,9 @@ package activities;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -58,6 +61,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     final String URL_GET_DATA = "https://simplifiedcoding.net/demos/marvel/";
+    private static final String RECYCLER_POSITION = "RecyclerViewPosition";
 
     AdView mAdView;
     RecyclerView recyclerView;
@@ -67,11 +71,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     FavoriteDatabase db;
     private FavoriteItemDao favoriteDatabaseDao;
 
+    private Parcelable recyclerPosition;
+
     private String TAG = "Main Activity";
     private String LOG = "";
     private SharedPreferences mSharedPreferences;
     private FavoriteViewModel mViewModel;
     LikeButton heartButton;
+    Boolean isFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,8 +93,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setSupportActionBar(toolbar);
 
         final LikeButton heartButton = findViewById(R.id.heart_button);
-        db = FavoriteDatabase.getFavoriteDatabase(this);
-        favoriteDatabaseDao = db.mFavoriteItemDao();
 
         heroList = new ArrayList<>();
 
@@ -102,47 +107,54 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
+        initHeroView();
+        initFavoriteView();
+        loadHeroes();
 
-//        heartButton.setOnLikeListener(new OnLikeListener() {
-//
-//
-//            public void liked(LikeButton likeButton) {
-//                // Code here executes on main thread after user presses button
-//                final Hero getFavoriteItems = new Hero(favoriteHeroes.getName(), favoriteHeroes.getRealname(),
-//                        favoriteHeroes.getTeam(), favoriteHeroes.getFirstappearance(), favoriteHeroes.getCreatedby(), favoriteHeroes.getPublisher(), favoriteHeroes.getImageurl(), favoriteHeroes.getBio());
-//
-//                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        db.mFavoriteItemDao().insertFavorite(getFavoriteItems);
-//                    }
-//                });
-//
-//            }
-//
-//            @Override
-//            public void unLiked(LikeButton likeButton) {
-//
-//                final Hero deleteFavoriteItems = new Hero(favoriteHeroes.getName(), favoriteHeroes.getRealname(),
-//                        favoriteHeroes.getTeam(), favoriteHeroes.getFirstappearance(), favoriteHeroes.getCreatedby(), favoriteHeroes.getPublisher(), favoriteHeroes.getImageurl(), favoriteHeroes.getBio());
-//
-//                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        favoriteDatabaseDao.deleteFavorite(deleteFavoriteItems);
-//                        Log.d(TAG, deleteFavoriteItems.getName() + " has been deleted from your favorites.");
-//                    }
-//                });
+    }
 
+    //This code came from Stack Overflow:
+    //https://stackoverflow.com/questions/27816217/how-to-save-recyclerviews-scroll-position-using-recyclerview-state
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECYCLER_POSITION,
+                recyclerView.getLayoutManager().onSaveInstanceState());
+    }
 
-                initHeroView();
-                initFavoriteView();
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(RECYCLER_POSITION)) {
+            recyclerPosition = savedInstanceState.getParcelable(RECYCLER_POSITION);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.menu_all:
                 loadHeroes();
-            }
+                break;
 
-//        });
-//    }
+            case R.id.menu_favorite:
+                recyclerView.setAdapter(new HeroAdapter(getApplicationContext(), favoriteHeroes));
+                loadFavorites();
+                return true;
 
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
 
     private void initHeroView() {
         checkSortOrder();
@@ -209,12 +221,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         });
 
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
+
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
